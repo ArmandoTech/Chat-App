@@ -2,6 +2,7 @@ const express= require('express')
 const path= require('path')
 const http= require('http')
 const socketio= require('socket.io')
+const messageInfo=require('./utils/messages')
 
 const app= express()
 const server= http.createServer(app)
@@ -18,19 +19,20 @@ app.use(express.static(path.join(__dirname, 'public')))
 io.on('connection', socket => {
 
     //Only the one who connects can see the message
-    socket.emit('message', 'Welcome to ChatApp')
+    socket.emit('message', messageInfo('Bot', 'Welcome to ChatApp'))
 
     //Everyone except the one who connects can see the message
-    socket.broadcast.emit('message', 'A user has joined the chat')
+    socket.broadcast.emit('message', messageInfo('Bot', 'A user has joined the chat'))
 
     //Everyone can see the message
     socket.on('disconnect', () => {
-        io.emit('message', 'A user has left the chat')
+        io.emit('message', messageInfo('Bot','A user has left the chat'))
     })
+
 
     //Catching chat messages
     socket.on('chatMessage', msg => {
-        io.emit('message', msg)
+        io.emit('message', messageInfo('user', msg))
     })
 })
 
