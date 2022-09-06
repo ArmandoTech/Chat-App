@@ -13,6 +13,14 @@ const outputMsg= (msg) => {
     document.querySelector('.chat-messages').appendChild(div)
 }
 
+//Getting user and room
+const { username, room }= Qs.parse(location.search, {
+    ignoreQueryPrefix: true
+})
+
+//Emitting joinroom event
+socket.emit('joinChat', { username, room })
+
 socket.on('message', message => {
     outputMsg(message)
 

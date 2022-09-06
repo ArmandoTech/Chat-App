@@ -3,6 +3,7 @@ const path= require('path')
 const http= require('http')
 const socketio= require('socket.io')
 const messageInfo=require('./utils/messages')
+const { joinUser, findUser }= require('./utils/users')
 
 const app= express()
 const server= http.createServer(app)
@@ -18,21 +19,28 @@ app.use(express.static(path.join(__dirname, 'public')))
 //Detects client connection
 io.on('connection', socket => {
 
-    //Only the one who connects can see the message
-    socket.emit('message', messageInfo('Bot', 'Welcome to ChatApp'))
+    //Joining the room
+    socket.on('joinChat', ({ username, room }) => {
 
-    //Everyone except the one who connects can see the message
-    socket.broadcast.emit('message', messageInfo('Bot', 'A user has joined the chat'))
+        const user= joinUser(socket.id, username, room)
+        socket.join(user.room)
 
-    //Everyone can see the message
-    socket.on('disconnect', () => {
-        io.emit('message', messageInfo('Bot','A user has left the chat'))
+
+        //Only the one who connects can see the message
+        socket.emit('message', messageInfo('Bot', `Welcome to ChatApp`))
+
+        //Everyone except the one who connects can see the message
+        socket.broadcast.to(user.room).emit('message', messageInfo('Bot', ` ${user.username} has joined the chat`))
+
+        //Catching chat messages
+        socket.on('chatMessage', msg => {
+        io.emit('message', messageInfo(user.username, msg))
+
+        //Everyone can see the message
+        socket.on('disconnect', () => {
+        io.to(user.room).emit('message', messageInfo('Bot',`${user.username} has left the chat`))
     })
-
-
-    //Catching chat messages
-    socket.on('chatMessage', msg => {
-        io.emit('message', messageInfo('user', msg))
+    })
     })
 })
 
