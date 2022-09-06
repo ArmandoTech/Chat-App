@@ -13,9 +13,9 @@ const joinUser= (id, username, room) => {
 }
 
 //FindUser
-const findUser= id => {
-    return users.find(user => user.id===id)
+const roomUsers= room => {
+    return users.find(user => user.room===room)
 }
 
 
-module.exports= {joinUser, findUser}
+module.exports= {joinUser, roomUsers}

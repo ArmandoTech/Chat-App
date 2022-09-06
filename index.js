@@ -3,7 +3,7 @@ const path= require('path')
 const http= require('http')
 const socketio= require('socket.io')
 const messageInfo=require('./utils/messages')
-const { joinUser, findUser }= require('./utils/users')
+const { joinUser, roomUsers }= require('./utils/users')
 
 const app= express()
 const server= http.createServer(app)
@@ -32,9 +32,16 @@ io.on('connection', socket => {
         //Everyone except the one who connects can see the message
         socket.broadcast.to(user.room).emit('message', messageInfo('Bot', ` ${user.username} has joined the chat`))
 
+        //Users and roomm info
+        io.to(user.room).emit('roomUser', {
+            room: user.room,
+            user: roomUsers(user.room)
+        })
+
+
         //Catching chat messages
         socket.on('chatMessage', msg => {
-        io.emit('message', messageInfo(user.username, msg))
+        io.to(user.room).emit('message', messageInfo(user.username, msg))
 
         //Everyone can see the message
         socket.on('disconnect', () => {
