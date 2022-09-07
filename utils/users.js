@@ -17,5 +17,16 @@ const roomUsers= room => {
     return users.find(user => user.room===room)
 }
 
+const removeRoomUser= id => {
+    const index= users.find(element=> element.id=== id)
 
-module.exports= {joinUser, roomUsers}
+    if (index != -1) {
+        users.splice(index, 1)[0]
+    }
+}
+
+const getRoomUser= room => {
+    return users.filter(element => element.room=== room)
+}
+
+module.exports= {joinUser, roomUsers, removeRoomUser, getRoomUser}
