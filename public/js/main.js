@@ -35,7 +35,12 @@ chatForm.addEventListener('submit', event => {
     event.preventDefault()
 
     //Getting message text
-    const msg= event.target.elements.msg.value
+    let msg= event.target.elements.msg.value
+    msg= msg.trim()
+
+    if (!msg) {
+        return false
+    }
 
     //Emiting message to the server
     socket.emit('chatMessage', msg)
@@ -54,8 +59,13 @@ const displayRoomName= room => {
 
 //display users in the room function
 const displayRoomUsers= users => {
-    roomUsers.innerHTML= `
-    ${users.map(element => `<li>${element.username}</li>`).join()}`
+
+    roomUsers.innerHTML = '';
+    users.forEach((element) => {
+      const li = document.createElement('li');
+      li.innerText = element.username;
+      roomUsers.appendChild(li);
+    });
 }
 
 //displaying room name and users in the room

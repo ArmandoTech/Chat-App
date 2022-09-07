@@ -21,7 +21,7 @@ const removeRoomUser= id => {
     const index= users.find(element=> element.id=== id)
 
     if (index != -1) {
-        users.splice(index, 1)[0]
+        return users.splice(index, 1)[0]
     }
 }
 

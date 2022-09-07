@@ -25,11 +25,17 @@ io.on('connection', socket => {
         const user= joinUser(socket.id, username, room)
         socket.join(user.room)
 
-        //Everyone except the one who connects can see the message
-        socket.broadcast.to(user.room).emit('message', messageInfo('Bot', ` ${user.username} has joined the chat`))
-        
         //Only the one who connects can see the message
         socket.emit('message', messageInfo('Bot', `Welcome to ChatApp`))
+
+        //Everyone except the one who connects can see the message
+        socket.broadcast.to(user.room).emit('message', messageInfo('Bot', ` ${user.username} has joined the chat`))
+
+        //Users and roomm info
+        io.to(user.room).emit('roomUser', {
+            room: user.room,
+            users: roomUsers(user.room),
+        })
 
         //Catching chat messages
         socket.on('chatMessage', msg => {
@@ -41,15 +47,15 @@ io.on('connection', socket => {
 
             if (userDisconnection) {
                 io.to(user.room).emit('message', messageInfo('Bot',`${user.username} has left the chat`))
-            }
 
-        
+                //Users and roomm info
+                io.to(user.room).emit('roomUser', {
+                room: user.room,
+                users: roomUsers(user.room),
+            })
+            }
     })
-        //Users and roomm info
-        io.to(user.room).emit('roomUser', {
-            room: user.room,
-            users: roomUsers(user.room),
-        })
+
     })
     })
 })
