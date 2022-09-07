@@ -29,16 +29,6 @@ io.on('connection', socket => {
         //Only the one who connects can see the message
         socket.emit('message', messageInfo('Bot', `Welcome to ChatApp`))
 
-        //Everyone except the one who connects can see the message
-        socket.broadcast.to(user.room).emit('message', messageInfo('Bot', ` ${user.username} has joined the chat`))
-
-        //Users and roomm info
-        io.to(user.room).emit('roomUser', {
-            room: user.room,
-            user: roomUsers(user.room)
-        })
-
-
         //Catching chat messages
         socket.on('chatMessage', msg => {
         io.to(user.room).emit('message', messageInfo(user.username, msg))
@@ -46,6 +36,15 @@ io.on('connection', socket => {
         //Everyone can see the message
         socket.on('disconnect', () => {
         io.to(user.room).emit('message', messageInfo('Bot',`${user.username} has left the chat`))
+
+        //Everyone except the one who connects can see the message
+        socket.broadcast.to(user.room).emit('message', messageInfo('Bot', ` ${user.username} has joined the chat`))
+
+        //Users and roomm info
+        io.to(user.room).emit('roomUser', {
+            room: user.room,
+            users: roomUsers(user.room),
+        })
     })
     })
     })

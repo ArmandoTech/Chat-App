@@ -1,6 +1,8 @@
 const socket=io()
 const chatForm= document.getElementById('chat-form')
 const chatMsg= document.querySelector('.chat-messages')
+const roomName= document.getElementById('room-name')
+const roomUsers= document.getElementById('users')
 
 //Function to output the message 
 const outputMsg= (msg) => {
@@ -42,4 +44,22 @@ chatForm.addEventListener('submit', event => {
     event.target.elements.msg.value=''
     event.target.elements.msg.focus()
 
+})
+
+
+//display room name function
+const displayRoomName= room => {
+    roomName.innerHTML= room
+}
+
+//display users in the room function
+const displayRoomUsers= users => {
+    roomUsers.innerHTML= `
+    ${users.map(element => `<li>${element.username}</li>`).join()}`
+}
+
+//displaying room name and users in the room
+socket.on('roomUser', ({room, users}) => {
+    displayRoomName(room)
+    displayRoomUsers(users)
 })
