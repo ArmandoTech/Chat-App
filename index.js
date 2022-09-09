@@ -19,6 +19,12 @@ app.use(express.static(path.join(__dirname, 'public')))
 //Detects client connection
 io.on('connection', socket => {
 
+    //Catching chat messages
+    socket.on('chatMessage', msg => {
+        console.log(msg)
+        io.emit('message', messageInfo(msg.username, msg))
+    })
+
     //Joining the room
     socket.on('joinChat', ({ username, room }) => {
 
@@ -37,9 +43,6 @@ io.on('connection', socket => {
             users: roomUsers(user.room),
         })
 
-        //Catching chat messages
-        socket.on('chatMessage', msg => {
-            io.to(user.room).emit('message', messageInfo(user.username, msg))
 
         //Everyone can see the message
         socket.on('disconnect', () => {
@@ -54,8 +57,6 @@ io.on('connection', socket => {
                 users: roomUsers(user.room),
             })
             }
-    })
-
     })
     })
 })
