@@ -23,14 +23,13 @@ io.on('connection', socket => {
     socket.on('joinChat', ({ username, room }) => {
         const user = joinUser(socket.id, username, room)
         socket.join(user.room)
+
         //Only the one who connects can see the message
         socket.emit('message', messageInfo('Bot', `Welcome to ChatApp`))
 
         //Everyone except the one who connects can see the message
         socket.broadcast.to(user.room).emit('message', messageInfo('Bot', ` ${user.username} has joined the chat`))
-        //Users and roomm info
 
-        // console.log(roomUsers(user.room));
         io.to(user.room).emit('roomUser', {
             room: user.room,
             users: getUsersByRoom(user.room),
@@ -53,7 +52,7 @@ io.on('connection', socket => {
 
         removeRoomUser(userToRemove.id)
 
-        // Users and roomm info
+        // Users and room info
         socket.broadcast.to(userToRemove.room).emit('roomUser', {
             room: userToRemove.room,
             users: getUsersByRoom(userToRemove.room),
