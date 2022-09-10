@@ -4,12 +4,24 @@ const http = require('http')
 const socketio = require('socket.io')
 const messageInfo = require('./utils/messages')
 const { joinUser, removeRoomUser, getUsersByRoom, getUserById } = require('./utils/users')
+const mysql= require('mysql')
+const myConnection= require('express-myconnection')
 
 const app = express()
 const server = http.createServer(app)
 const io = socketio(server)
 
-// Setting port
+//Setting database
+const dbOptions= {
+    host: 'localhost',
+    database: 'chatapp',
+    user: 'root',
+    password: '',
+}
+
+app.use(myConnection(mysql, dbOptions, 'single'))
+
+//Setting port
 const PORT = process.env.PORT || 3000
 
 //Setting static files
