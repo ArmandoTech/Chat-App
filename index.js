@@ -6,6 +6,7 @@ const messageInfo = require('./utils/messages')
 const { joinUser, removeRoomUser, getUsersByRoom, getUserById } = require('./utils/users')
 const mysql= require('mysql')
 const myConnection= require('express-myconnection')
+const messagesRoutes= require('./routes/messages')
 
 const app = express()
 const server = http.createServer(app)
@@ -20,6 +21,7 @@ const dbOptions= {
 }
 
 app.use(myConnection(mysql, dbOptions, 'single'))
+app.use(express.urlencoded({extended:false}))
 
 //Setting port
 const PORT = process.env.PORT || 3000
@@ -73,6 +75,8 @@ io.on('connection', socket => {
 
 })
 
+//routes
+app.use('/', messagesRoutes)
 
 //Launching server
 server.listen(PORT, () => {
