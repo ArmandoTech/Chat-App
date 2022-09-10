@@ -1,16 +1,16 @@
-const express= require('express')
-const path= require('path')
-const http= require('http')
-const socketio= require('socket.io')
-const messageInfo=require('./utils/messages')
-const { joinUser, roomUsers, removeRoomUser, getRoomUser }= require('./utils/users')
+const express = require('express')
+const path = require('path')
+const http = require('http')
+const socketio = require('socket.io')
+const messageInfo = require('./utils/messages')
+const { joinUser, removeRoomUser, getUsersByRoom, getUserById } = require('./utils/users')
 
-const app= express()
-const server= http.createServer(app)
-const io= socketio(server)
+const app = express()
+const server = http.createServer(app)
+const io = socketio(server)
 
 // Setting port
-const PORT= process.env.PORT || 3000
+const PORT = process.env.PORT || 3000
 
 //Setting static files
 app.use(express.static(path.join(__dirname, 'public')))
@@ -19,46 +19,48 @@ app.use(express.static(path.join(__dirname, 'public')))
 //Detects client connection
 io.on('connection', socket => {
 
-    //Catching chat messages
-    socket.on('chatMessage', msg => {
-        console.log(msg)
-        io.emit('message', messageInfo(msg.username, msg))
-    })
-
     //Joining the room
     socket.on('joinChat', ({ username, room }) => {
-
-        const user= joinUser(socket.id, username, room)
+        const user = joinUser(socket.id, username, room)
         socket.join(user.room)
-
         //Only the one who connects can see the message
         socket.emit('message', messageInfo('Bot', `Welcome to ChatApp`))
 
         //Everyone except the one who connects can see the message
         socket.broadcast.to(user.room).emit('message', messageInfo('Bot', ` ${user.username} has joined the chat`))
-
         //Users and roomm info
+
+        // console.log(roomUsers(user.room));
         io.to(user.room).emit('roomUser', {
             room: user.room,
-            users: roomUsers(user.room),
+            users: getUsersByRoom(user.room),
+        })
+    })
+
+    //Catching chat messages
+    socket.on('chatMessage', payload => {
+        io.to(payload.room).emit('message', messageInfo(payload.username, payload.msg))
+        //Everyone can see the message
+    })
+
+    socket.on('disconnect', () => {
+        const userToRemove = getUserById(socket.id)
+
+        if (!userToRemove)
+            return
+
+        socket.broadcast.to(userToRemove.room).emit('message', messageInfo('Bot', `${userToRemove.username} has left the chat`))
+
+        removeRoomUser(userToRemove.id)
+
+        // Users and roomm info
+        socket.broadcast.to(userToRemove.room).emit('roomUser', {
+            room: userToRemove.room,
+            users: getUsersByRoom(userToRemove.room),
         })
 
-
-        //Everyone can see the message
-        socket.on('disconnect', () => {
-            const userDisconnection= removeRoomUser(socket.id)
-
-            if (userDisconnection) {
-                io.to(user.room).emit('message', messageInfo('Bot',`${user.username} has left the chat`))
-
-                //Users and roomm info
-                io.to(user.room).emit('roomUser', {
-                room: user.room,
-                users: roomUsers(user.room),
-            })
-            }
     })
-    })
+
 })
 
 
