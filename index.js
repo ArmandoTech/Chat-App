@@ -27,7 +27,6 @@ const PORT = process.env.PORT || 3000
 //Setting static files
 app.use(express.static(path.join(__dirname, 'public')))
 
-
 //Detects client connection
 io.on('connection', socket => {
 
