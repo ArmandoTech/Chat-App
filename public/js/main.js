@@ -35,18 +35,18 @@ chatForm.addEventListener('submit', event => {
     event.preventDefault()
 
     //Getting message text
-    let msg= event.target.elements.msg.value
-    msg= msg.trim()
+    let msg = event.target.elements.msg.value
+    msg = msg.trim()
 
     if (!msg) {
         return false
     }
 
     //Emiting message to the server
-    socket.emit('chatMessage', msg)
+    socket.emit('chatMessage', { msg, room, username })
 
     //Clearing the input after message
-    event.target.elements.msg.value=''
+    event.target.elements.msg.value = ''
     event.target.elements.msg.focus()
 
 })
