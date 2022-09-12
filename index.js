@@ -43,6 +43,24 @@ const postToDb= (status, callback) => {
                 callback(true)
             }
         })
+        connection.query("INSERT INTO `messages` (`username`) VALUES ('"+status+"')", (err, rows) => {
+            connection.release()
+            if (!err) {
+                callback(true)
+            }
+        })
+        connection.query("INSERT INTO `messages` (`room`) VALUES ('"+status+"')", (err, rows) => {
+            connection.release()
+            if (!err) {
+                callback(true)
+            }
+        })
+        connection.query("INSERT INTO `messages` (`id`) VALUES ('"+status+"')", (err, rows) => {
+            connection.release()
+            if (!err) {
+                callback(true)
+            }
+        })
         connection.on('error', err => {
             callback(false)
             return
@@ -115,8 +133,6 @@ io.on('connection', socket => {
 app.get('/', (req, res) => {
     res.sendFile(__dirname + '/index.html')
 })
-// //routes
-// app.use('/', messagesRoutes)
 
 //Launching server
 server.listen(PORT, () => {
