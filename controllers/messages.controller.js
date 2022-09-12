@@ -1,11 +1,11 @@
 const controller= {}
 
 controller.save= (req, res) => {
-    console.log(req)
-    const data= req.body
-
+    const {username, room}= req.query
+    const {id, message, time}= req.body
+    console.log(id, message, time)
     req.getConnection((err, conn) => {
-        conn.query('INSERT INTO messages set ?', [data], (err, rows) => {
+        conn.query('INSERT INTO messages set ?', [id, username, room, message, time], (err, rows) => {
             if (err) {
                 res.json(err)
             }
