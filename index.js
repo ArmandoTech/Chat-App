@@ -30,15 +30,15 @@ const dbOptions= {
 app.use(myConnection(mysql, dbOptions, 'single'))
 app.use(express.urlencoded({extended:false}))
 
-const postToDb= (msg, room, username, callback) => {
+const postToDb= (id, msg, room, username, callback) => {
     connection.getConnection((err, connection) => {
         if (err) {
             connection.release()
             callback(false)
             return
         }
-        let query= 'INSERT INTO messages (message, room, username) VALUES (?, ?, ?);'
-        let params= [msg, room, username]
+        let query= 'INSERT INTO messages (id, username, message, room) VALUES (?, ?, ?, ?);'
+        let params= [username, room, id, msg]
         connection.query(query, params, (err, rows) => {    
             connection.release()
             if (!err) {
@@ -84,7 +84,7 @@ io.on('connection', socket => {
         io.to(payload.room).emit('message', messageInfo(payload.username, payload.msg))
 
         //Saving it on db
-        postToDb(payload.msg, payload.room, payload.username, (success) => {
+        postToDb(payload.msg, payload.room, payload.username, socket.id,  (success) => {
             if (success) {
                 console.log('Message saved on db')
             } else {
