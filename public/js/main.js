@@ -27,7 +27,7 @@ socket.on('message', message => {
     outputMsg(message)
 
     //Always be at the last message
-    chatMsg.scrollTop= chatMsg.scrollHeight
+    chatMsg.scrollTop= chatMsg.scrollHeight    
 })
 
 //Submitting a message

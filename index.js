@@ -6,13 +6,20 @@ const messageInfo = require('./utils/messages')
 const { joinUser, removeRoomUser, getUsersByRoom, getUserById } = require('./utils/users')
 const mysql= require('mysql')
 const myConnection= require('express-myconnection')
-const messagesRoutes= require('./routes/messages')
 
 const app = express()
 const server = http.createServer(app)
 const io = socketio(server)
 
-//Setting database
+//Connection to database
+const connection= mysql.createPool({
+    connectionLimit: 100,
+    host: 'localhost',
+    user: 'root',
+    password: '',
+    database: 'chatapp',
+})
+
 const dbOptions= {
     host: 'localhost',
     database: 'chatapp',
@@ -22,6 +29,26 @@ const dbOptions= {
 
 app.use(myConnection(mysql, dbOptions, 'single'))
 app.use(express.urlencoded({extended:false}))
+
+const postToDb= (status, callback) => {
+    connection.getConnection((err, connection) => {
+        if (err) {
+            connection.release()
+            callback(false)
+            return
+        }
+        connection.query("INSERT INTO `messages` (`message`) VALUES ('"+status+"')", (err, rows) => {
+            connection.release()
+            if (!err) {
+                callback(true)
+            }
+        })
+        connection.on('error', err => {
+            callback(false)
+            return
+        })
+    }
+)}
 
 //Setting port
 const PORT = process.env.PORT || 3000
@@ -51,8 +78,17 @@ io.on('connection', socket => {
 
     //Catching chat messages
     socket.on('chatMessage', payload => {
-        io.to(payload.room).emit('message', messageInfo(payload.username, payload.msg))
         //Everyone can see the message
+        io.to(payload.room).emit('message', messageInfo(payload.username, payload.msg))
+
+        //Saving it on db
+        postToDb(payload.msg, (success) => {
+            if (success) {
+                console.log('Message saved on db')
+            } else {
+                console.log('Error saving message on db')
+            }
+        })
     })
 
     socket.on('disconnect', () => {
@@ -75,8 +111,12 @@ io.on('connection', socket => {
 
 })
 
-//routes
-app.use('/', messagesRoutes)
+
+app.get('/', (req, res) => {
+    res.sendFile(__dirname + '/index.html')
+})
+// //routes
+// app.use('/', messagesRoutes)
 
 //Launching server
 server.listen(PORT, () => {
