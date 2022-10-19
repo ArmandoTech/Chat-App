@@ -12,6 +12,9 @@ const {
 const mysql = require("mysql");
 const myConnection = require("express-myconnection");
 require("dotenv").config();
+const CyclicDB = require("cyclic-dynamodb");
+
+const db = CyclicDB("cyclic-dynamodb");
 
 const app = express();
 const server = http.createServer(app);
