@@ -20,10 +20,10 @@ const io = socketio(server);
 //Connection to database
 const connection = mysql.createPool({
   connectionLimit: process.env.connectionLimit,
-  host: process.env.host,
-  user: process.env.user,
-  password: process.env.password,
-  database: process.env.database,
+  host: process.env.HOST,
+  user: process.env.USER,
+  password: process.env.PASSWORD,
+  database: process.env.DATABASE,
 });
 
 const dbOptions = {
